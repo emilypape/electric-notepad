@@ -1,13 +1,19 @@
 const express = require('express')
 const fs = require('fs');
 const path = require('path');
+const notesArray = './db/notesArray.json';
 
 const PORT = process.env.PORT || 3005;
 const app = express();
 
+app.use(express.static('public'));
+
 app.get('/api/notes', (req, res) => {
     // reads db json file
+    let notesData = fs.readFileSync(notesArray)
+    let savedNotes = JSON.parse(notesData)
     // returns all the saved notes as json
+    res.json(savedNotes)
 });
 
 app.post('/api/notes', (req, res) => {
