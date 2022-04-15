@@ -6,7 +6,9 @@ const notesArray = './db/notesArray.json';
 const PORT = process.env.PORT || 3005;
 const app = express();
 
-app.use(express.static('public'));
+app.use(express.static('public')); //Serve up files in public directory
+app.use(express.json()); //Used to parse JSON bodies
+app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 app.get('/api/notes', (req, res) => {
     // reads db json file
@@ -18,10 +20,19 @@ app.get('/api/notes', (req, res) => {
 
 app.post('/api/notes', (req, res) => {
     //receives a new note to save on the request body, 
+    const newNoteData = req.body;
     //add it to the db.json file
+    const savedNotes = JSON.parse(fs.readFileSync(notesArray))
+    savedNotes.push(newNoteData)
+    savedNotes.forEach((note, index) => {
+        note.id = index;
+    })
+    let noteString = JSON.stringify(savedNotes);
+    fs.writeFileSync(notesArray, noteString)
     // return the new note to the client.
+    res.json(newNoteData);
     // give each note a unique id when saved
-})
+});
 
 app.delete('/api/notes/:id', (req, res) => {
     // read all the notes from the db json file
