@@ -8,7 +8,6 @@ const app = express();
 
 app.use(express.static('public')); //Serve up files in public directory
 app.use(express.json()); //Used to parse JSON bodies
-app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 app.get('/api/notes', (req, res) => {
     // reads db json file
@@ -25,7 +24,7 @@ app.post('/api/notes', (req, res) => {
     const savedNotes = JSON.parse(fs.readFileSync(notesArray))
     savedNotes.push(newNoteData)
     savedNotes.forEach((note, index) => {
-        note.id = index;
+        note.id = index + 1;
     })
     let noteString = JSON.stringify(savedNotes);
     fs.writeFileSync(notesArray, noteString)
@@ -36,8 +35,21 @@ app.post('/api/notes', (req, res) => {
 
 app.delete('/api/notes/:id', (req, res) => {
     // read all the notes from the db json file
+    const notesData = fs.readFileSync(notesArray);
+    let savedNotes = JSON.parse(notesData);
     // select the note with the id to delete
+    let id = parseInt(req.params.id);
+    savedNotes = savedNotes.filter((note) => {
+        if(note.id === id) {
+            return false
+        }
+        return true;
+    })
     // rewrite notes to the db json file
+    let noteString = JSON.stringify(savedNotes)
+    fs.writeFileSync(notesArray, noteString)
+
+    res.json(`Note ${id} Deleted!`)
 })
 
 // HTML ROUTES
